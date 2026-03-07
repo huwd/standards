@@ -22,8 +22,8 @@ Each new repo currently repeats this bootstrapping work. This repo captures the 
 
 Standards have been extracted from:
 
-- `../learn_hanzi` — Rails 8, RSpec, Rubocop, Brakeman, GitHub Actions CI, GitHub rulesets
-- `../audiobook-sync` — Python 3.12, pytest, ruff, mypy, uv, ports-and-adapters architecture
+- A Rails project — Rails 8, RSpec, Rubocop, Brakeman, GitHub Actions CI, GitHub rulesets
+- A Python project — Python 3.12, pytest, ruff, mypy, uv, ports-and-adapters architecture
 
 ---
 
@@ -108,8 +108,8 @@ Weekly grouped updates (minor + patch together, major separate) for both the lan
 
 ## Remaining work
 
-- [x] Extract and generalise `ci-python.yml` workflow from `audiobook-sync` patterns
-- [x] Extract and generalise `ci-rails.yml` workflow from `learn_hanzi`
+- [x] Extract and generalise `ci-python.yml` workflow from a Python project
+- [x] Extract and generalise `ci-rails.yml` workflow from a Rails project
 - [x] Copy and generalise `dependabot.yml` template
 - [x] Verify ruleset JSONs are importable as-is (actor IDs may need adjusting per org)
 - [x] Document how to bootstrap a new repo using this collection
