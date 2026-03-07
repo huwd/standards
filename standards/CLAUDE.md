@@ -2,7 +2,7 @@
 
 This file applies to all of Huw's personal projects. It is symlinked from `~/.claude/CLAUDE.md`.
 
-Source of truth: `~/Projects/Personal/standards/standards/CLAUDE.md`
+Source of truth: `standards/standards/CLAUDE.md`
 
 Project-specific `CLAUDE.md` files extend or override these defaults.
 
@@ -15,19 +15,25 @@ Format: `<type>[optional scope]: <description>`
 **Types**: `feat` `fix` `docs` `style` `refactor` `perf` `test` `build` `ci` `chore`
 
 **Subject line**:
+
 - Max 50 characters
 - Imperative mood ("Add feature" not "Added feature")
 - No trailing period
 - Breaking changes: `feat!:` or `BREAKING CHANGE:` footer
 
 **Body** (required for anything non-trivial):
+
 - Separated from subject by a blank line
 - Wrapped at 72 characters
-- Answer three questions: Why is this change necessary? How does it address the issue? What side effects does it have?
-- Capture the *why* — the code shows *how*, but rationale is hard to reconstruct later
+- Answer three questions:
+  - Why is this change necessary?
+  - How does it address the issue?
+  - What side effects does it have?
+- Capture the _why_ — the code shows _how_, but rationale is hard to reconstruct later
 - Note alternatives considered if choosing approach A over B
 
 **Structure**:
+
 - Each commit is a self-contained logical unit — avoid needing "and" in the subject
 - Commits should tell a coherent narrative through history
 - Tidy feature branch history before opening a PR
@@ -96,7 +102,7 @@ On a new repo, apply these in order:
 2. Import `prevent_tag_deletion.json` ruleset
 3. Add `.github/dependabot.yml` — weekly grouped updates for the package ecosystem and `github-actions`
 
-Ruleset JSON files live in `~/Projects/Personal/standards/github/rulesets/`.
+Ruleset JSON files live in `standards/github/rulesets/`.
 
 ---
 
@@ -111,4 +117,4 @@ Ruleset JSON files live in `~/Projects/Personal/standards/github/rulesets/`.
 
 ## This standards repo
 
-Full plan and bootstrap checklist: `~/Projects/Personal/standards/docs/plan.md`
+Full plan and bootstrap checklist: `standards/docs/plan.md`
