@@ -1,0 +1,122 @@
+# Rails CI template.
+#
+# Copy to .github/workflows/ci.yml in your Rails project and:
+# 1. Adjust the job names if needed — they must match the `required_status_checks`
+#    in your protect_main ruleset exactly.
+# 2. Add or remove service containers (redis, postgres) as needed.
+# 3. Update the Ruby version file reference if not using .ruby-version.
+# 4. Remove `scan_js` if not using importmap.
+# 5. Update `bin/rails tailwindcss:build` if not using Tailwind.
+
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+env:
+  BUNDLE_WITHOUT: development
+
+jobs:
+  scan_ruby:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Ruby
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: .ruby-version
+          bundler-cache: true
+
+      - name: Scan for common Rails security vulnerabilities using static analysis
+        run: |
+          set +e
+          bin/brakeman --no-pager
+          brakeman_exit=$?
+          set -e
+          # Exit code 5 means brakeman is outdated — not a security issue, don't fail CI.
+          # All other non-zero exit codes indicate real warnings or errors.
+          if [ $brakeman_exit -ne 0 ] && [ $brakeman_exit -ne 5 ]; then exit $brakeman_exit; fi
+
+  scan_js:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Ruby
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: .ruby-version
+          bundler-cache: true
+
+      - name: Scan for security vulnerabilities in JavaScript dependencies
+        run: bin/importmap audit
+
+  lint:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Ruby
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: .ruby-version
+          bundler-cache: true
+
+      - name: Lint code for consistent style
+        run: bin/rubocop -f github
+
+  test:
+    runs-on: ubuntu-latest
+
+    # Uncomment and configure services as needed:
+    # services:
+    #   redis:
+    #     image: redis
+    #     ports:
+    #       - 6379:6379
+    #     options: --health-cmd "redis-cli ping" --health-interval 10s --health-timeout 5s --health-retries 5
+    #   postgres:
+    #     image: postgres
+    #     env:
+    #       POSTGRES_PASSWORD: postgres
+    #     ports:
+    #       - 5432:5432
+    #     options: --health-cmd pg_isready --health-interval 10s --health-timeout 5s --health-retries 5
+
+    steps:
+      - name: Install packages
+        run: sudo apt-get update && sudo apt-get install --no-install-recommends -y curl libjemalloc2 sqlite3
+
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Ruby
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: .ruby-version
+          bundler-cache: true
+
+      - name: Build assets
+        run: bin/rails tailwindcss:build
+
+      - name: Run tests
+        env:
+          RAILS_ENV: test
+        run: bin/rails db:test:prepare && bundle exec rspec
+
+      - name: Upload coverage report
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: coverage-report
+          path: coverage/
+          if-no-files-found: ignore

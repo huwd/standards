@@ -1,0 +1,46 @@
+# Dependabot configuration template.
+#
+# Copy to .github/dependabot.yml in your project and:
+# 1. Set the correct `package-ecosystem` for your language (bundler, pip, npm, cargo, etc.)
+# 2. Add additional ecosystems if needed (e.g. docker, github-actions is usually always useful)
+# 3. Adjust group patterns and cooldown days to taste.
+#
+# Docs: https://docs.github.com/en/code-security/dependabot/dependabot-version-updates/configuration-options-for-the-dependabot.yml-file
+
+version: 2
+updates:
+  # Replace `bundler` with your language ecosystem (pip, npm, cargo, go, etc.)
+  - package-ecosystem: bundler
+    directory: "/"
+    schedule:
+      interval: weekly
+      day: monday
+    cooldown:
+      default-days: 7
+      semver-major-days: 30
+      semver-minor-days: 7
+      semver-patch-days: 3
+    open-pull-requests-limit: 10
+    groups:
+      minor-and-patch:
+        patterns:
+          - "*"
+        update-types:
+          - "minor"
+          - "patch"
+
+  - package-ecosystem: github-actions
+    directory: "/"
+    schedule:
+      interval: weekly
+      day: monday
+    cooldown:
+      default-days: 7
+    open-pull-requests-limit: 5
+    groups:
+      github-actions-minor-and-patch:
+        patterns:
+          - "*"
+        update-types:
+          - "minor"
+          - "patch"

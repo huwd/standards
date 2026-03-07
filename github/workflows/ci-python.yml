@@ -1,0 +1,93 @@
+# Python CI template (uv-based).
+#
+# Copy to .github/workflows/ci.yml in your Python project and:
+# 1. Adjust the job names if needed — they must match the `required_status_checks`
+#    in your protect_main ruleset exactly.
+# 2. Update the Python version if not using 3.12.
+# 3. Update the source directory in the mypy command if not `src/`.
+# 4. Remove jobs that don't apply (e.g. no mypy on untyped projects).
+# 5. Adjust coverage thresholds in pyproject.toml rather than here.
+#
+# Assumes: uv, ruff, mypy, pytest, pytest-cov configured in pyproject.toml.
+
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v4
+
+      - name: Install dependencies
+        run: uv sync
+
+      - name: Lint with ruff
+        run: uv run ruff check .
+
+      - name: Check formatting with ruff
+        run: uv run ruff format --check .
+
+  typecheck:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v4
+
+      - name: Install dependencies
+        run: uv sync
+
+      - name: Type check with mypy
+        run: uv run mypy src/
+
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v4
+
+      - name: Install dependencies
+        run: uv sync
+
+      - name: Run tests with coverage
+        run: uv run pytest --cov
+
+      - name: Upload coverage report
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: coverage-report
+          path: htmlcov/
+          if-no-files-found: ignore

@@ -1,0 +1,52 @@
+{
+  "name": "Protect main",
+  "target": "branch",
+  "enforcement": "active",
+  "conditions": {
+    "ref_name": {
+      "exclude": [],
+      "include": ["~DEFAULT_BRANCH"]
+    }
+  },
+  "rules": [
+    {
+      "type": "deletion"
+    },
+    {
+      "type": "non_fast_forward"
+    },
+    {
+      "type": "pull_request",
+      "parameters": {
+        "require_code_owner_review": false,
+        "require_last_push_approval": false,
+        "dismiss_stale_reviews_on_push": false,
+        "required_approving_review_count": 0,
+        "required_review_thread_resolution": false
+      }
+    },
+    {
+      "type": "commit_message_pattern",
+      "parameters": {
+        "name": "Conventional commits",
+        "negate": false,
+        "operator": "regex",
+        "pattern": "^(build|chore|ci|docs|feat|fix|perf|refactor|revert|style|test){1}(\\(([\\w\\-\\.]+)\\))?(!)?: ([\\w ])+([\\s\\S]*)"
+      }
+    },
+    {
+      "type": "required_status_checks",
+      "parameters": {
+        "strict_required_status_checks_policy": true,
+        "required_status_checks": []
+      }
+    }
+  ],
+  "bypass_actors": [
+    {
+      "actor_type": "RepositoryRole",
+      "actor_id": 5,
+      "bypass_mode": "always"
+    }
+  ]
+}
