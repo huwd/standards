@@ -55,7 +55,7 @@ github/
 - Conventional Commits format: `<type>[optional scope]: <description>`
 - Types: `feat fix docs style refactor perf test build ci chore`
 - Subject: max 50 chars, imperative mood, no trailing period
-- Body: wrapped at 72 chars, explains *why* (not what), notes alternatives considered
+- Body: wrapped at 72 chars, explains _why_ (not what), notes alternatives considered
 - Each commit is a self-contained logical unit
 - History is tidied on feature branches before PR
 
@@ -78,13 +78,13 @@ github/
 
 All of these must pass in CI before merge:
 
-| Check | Rails | Python |
-|---|---|---|
-| Lint | `bin/rubocop -f github` | `uv run ruff check . && uv run ruff format --check .` |
-| Type check | — | `uv run mypy src/` |
-| Security scan | `bin/brakeman --no-pager` | — |
-| Tests | `bundle exec rspec` | `uv run pytest` |
-| Coverage | SimpleCov artifact upload | `uv run pytest --cov` artifact upload |
+| Check         | Rails                     | Python                                                |
+| ------------- | ------------------------- | ----------------------------------------------------- |
+| Lint          | `bin/rubocop -f github`   | `uv run ruff check . && uv run ruff format --check .` |
+| Type check    | —                         | `uv run mypy src/`                                    |
+| Security scan | `bin/brakeman --no-pager` | —                                                     |
+| Tests         | `bundle exec rspec`       | `uv run pytest`                                       |
+| Coverage      | SimpleCov artifact upload | `uv run pytest --cov` artifact upload                 |
 
 Coverage targets: ≥80% line, ≥75% branch.
 
@@ -93,6 +93,7 @@ Coverage targets: ≥80% line, ≥75% branch.
 Import `github/rulesets/protect_main.json` and `github/rulesets/prevent_tag_deletion.json` via the GitHub API or UI.
 
 `protect_main` enforces:
+
 - No deletion of the default branch
 - No force-push
 - PR required before merge
@@ -107,13 +108,13 @@ Weekly grouped updates (minor + patch together, major separate) for both the lan
 
 ## Remaining work
 
-- [ ] Extract and generalise `ci-python.yml` workflow from `audiobook-sync` patterns
-- [ ] Extract and generalise `ci-rails.yml` workflow from `learn_hanzi`
-- [ ] Copy and generalise `dependabot.yml` template
-- [ ] Verify ruleset JSONs are importable as-is (actor IDs may need adjusting per org)
-- [ ] Document how to bootstrap a new repo using this collection
-- [ ] Confirm symlink setup: `ln -sf ~/Projects/Personal/standards/standards/CLAUDE.md ~/.claude/CLAUDE.md`
-- [ ] Add `standards/CLAUDE.md` reference back to this repo URL once it has a remote
+- [x] Extract and generalise `ci-python.yml` workflow from `audiobook-sync` patterns
+- [x] Extract and generalise `ci-rails.yml` workflow from `learn_hanzi`
+- [x] Copy and generalise `dependabot.yml` template
+- [x] Verify ruleset JSONs are importable as-is (actor IDs may need adjusting per org)
+- [x] Document how to bootstrap a new repo using this collection
+- [x] Confirm symlink setup
+- [x] Add `standards/CLAUDE.md` reference back to this repo URL once it has a remote
 
 ---
 
