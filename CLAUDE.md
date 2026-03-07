@@ -30,7 +30,7 @@ Before adding a standard, verify it against at least one real project. Don't inv
 When updating `standards/CLAUDE.md`, also update the symlink target so changes take effect globally:
 
 ```bash
-ln -sf ~/Projects/Personal/standards/standards/CLAUDE.md ~/.claude/CLAUDE.md
+ln -sf <repo_location>/standards/standards/CLAUDE.md ~/.claude/CLAUDE.md
 ```
 
 ## Commit standards
