@@ -84,6 +84,19 @@ Run the full local check before pushing (see project-specific `CLAUDE.md` for th
 
 ---
 
+## Mutation testing
+
+Run after achieving the coverage targets, to find tests that pass for the
+wrong reasons. See `docs/mutation-testing.md` for the full guide.
+
+- Tool (Python): `mutmut` — configure in `setup.cfg`
+- Mutate core logic modules only; exclude infrastructure boundaries
+- Target ≥ 65% overall kill rate on core modules
+- Not a blocking CI gate — run via `workflow_dispatch` for on-demand snapshots
+- Annotate equivalent mutations with `do_not_mutate` rather than chasing them
+
+---
+
 ## CI/CD (GitHub Actions)
 
 - CI runs on `pull_request` and `push` to `main`
