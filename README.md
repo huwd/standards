@@ -11,16 +11,18 @@ standards/
   CLAUDE.md              # Global Claude Code instructions — symlink to ~/.claude/CLAUDE.md
 
 docs/
-  plan.md                # Background, decisions, and remaining work
+  plan.md                                 # Background, decisions, and remaining work
+  publish-to-tailscale-registry.md        # How to push container images to a self-hosted registry over Tailscale
 
 github/
   rulesets/
-    protect_main.json    # Importable ruleset: PR required, no force-push, conventional commits, status checks
+    protect_main.json                     # Importable ruleset: PR required, no force-push, conventional commits, status checks
     prevent_tag_deletion.json
   workflows/
-    ci-rails.yml         # Rails CI template: Brakeman, importmap audit, Rubocop, RSpec + coverage
-    ci-python.yml        # Python CI template: ruff, mypy, pytest + coverage
-  dependabot.yml         # Weekly grouped Dependabot updates for language ecosystem + github-actions
+    ci-rails.yml                          # Rails CI template: Brakeman, importmap audit, Rubocop, RSpec + coverage
+    ci-python.yml                         # Python CI template: ruff, mypy, pytest + coverage
+    publish-to-tailscale-registry.yml     # Publish job: push image to a tailnet-hosted registry via tailscale/github-action
+  dependabot.yml                          # Weekly grouped Dependabot updates for language ecosystem + github-actions
 ```
 
 ## Using the GitHub rulesets
@@ -40,6 +42,18 @@ Key things to check:
 - Job names must match the `required_status_checks` in your `protect_main` ruleset exactly
 - Coverage thresholds are set in `pyproject.toml` / `.simplecov`, not in the workflow
 - Action versions are pinned to mutable tags here — pin to full commit SHAs in production repos for supply-chain safety
+
+## Publishing container images over Tailscale
+
+If you self-host a Docker registry and want GitHub Actions to push to it
+without going through a public tunnel (Cloudflare, ngrok, etc.), see
+`docs/publish-to-tailscale-registry.md` for the full pattern and the one-time
+Tailscale setup it depends on.
+
+The reusable workflow snippet lives at
+`github/workflows/publish-to-tailscale-registry.yml`. Drop the `publish` job
+into an existing CI workflow, or copy the file as-is and adjust the registry
+hostname and image name.
 
 ## Using the Dependabot template
 

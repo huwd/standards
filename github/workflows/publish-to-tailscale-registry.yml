@@ -1,0 +1,65 @@
+# Publish container image to a private registry over Tailscale.
+#
+# Drop the `publish` job below into your existing CI workflow, or copy this
+# whole file to .github/workflows/publish.yml.
+#
+# Before this works, complete the one-time setup in
+# docs/publish-to-tailscale-registry.md:
+#   1. Define `tag:ci` in your Tailscale ACL
+#   2. Create an OAuth client with `auth_keys` Write scope and tag `tag:ci`
+#   3. Add four secrets to the repo:
+#        TAILSCALE_OAUTH_CLIENT_ID
+#        TAILSCALE_OAUTH_CLIENT_SECRET
+#        REGISTRY_USERNAME
+#        REGISTRY_PASSWORD
+#
+# Then change two things below to match your setup:
+#   - REGISTRY_HOST  — replace `nas:5000` with your registry's tailnet hostname
+#   - IMAGE_NAME     — replace `your-image-name` with the image to publish
+#
+# If dropping into an existing workflow, also adjust:
+#   - `needs:` to match your lint/typecheck/test job names
+#   - `working-directory` and the build context path
+
+name: publish
+
+on:
+  push:
+    branches: [main]
+
+jobs:
+  publish:
+    name: publish
+    runs-on: ubuntu-latest
+    needs: [lint, typecheck, test]
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+
+      # Bring the runner up as an ephemeral, tagged node on the tailnet.
+      # Note: the input is `oauth-secret`, not `oauth-client-secret`.
+      - uses: tailscale/github-action@306e68a486fd2350f2bfc3b19fcd143891a4a2d8 # v4.1.2
+        with:
+          oauth-client-id: ${{ secrets.TAILSCALE_OAUTH_CLIENT_ID }}
+          oauth-secret: ${{ secrets.TAILSCALE_OAUTH_CLIENT_SECRET }}
+          tags: tag:ci
+
+      # Allow plain-HTTP push to the registry. Safe because WireGuard already
+      # encrypts the transport; this only relaxes Docker's TLS requirement
+      # for this specific hostname. See docs/publish-to-tailscale-registry.md
+      # for the threat model.
+      - name: Allow insecure registry over Tailscale
+        run: |
+          echo '{"insecure-registries": ["nas:5000"]}' | sudo tee /etc/docker/daemon.json
+          sudo systemctl restart docker
+
+      - uses: docker/login-action@4907a6ddec9925e35a0a9e82d7399ccc52663121 # v4.1.0
+        with:
+          registry: nas:5000
+          username: ${{ secrets.REGISTRY_USERNAME }}
+          password: ${{ secrets.REGISTRY_PASSWORD }}
+
+      - uses: docker/build-push-action@bcafcacb16a39f128d818304e6c9c0c18556b85f # v7.1.0
+        with:
+          context: .
+          push: true
+          tags: nas:5000/your-image-name:latest
