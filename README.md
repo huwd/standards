@@ -21,7 +21,8 @@ github/
   workflows/
     ci-rails.yml                          # Rails CI template: Brakeman, importmap audit, Rubocop, RSpec + coverage
     ci-python.yml                         # Python CI template: ruff, mypy, pytest + coverage
-    publish-to-tailscale-registry.yml     # Publish job: push image to a tailnet-hosted registry via tailscale/github-action
+    publish-to-tailscale-registry-http.yml   # Publish job (HTTP variant): push to a plain-HTTP registry over WireGuard
+    publish-to-tailscale-registry-https.yml  # Publish job (HTTPS variant): push to a registry with a Tailscale-issued cert
   dependabot.yml                          # Weekly grouped Dependabot updates for language ecosystem + github-actions
 ```
 
@@ -50,10 +51,19 @@ without going through a public tunnel (Cloudflare, ngrok, etc.), see
 `docs/publish-to-tailscale-registry.md` for the full pattern and the one-time
 Tailscale setup it depends on.
 
-The reusable workflow snippet lives at
-`github/workflows/publish-to-tailscale-registry.yml`. Drop the `publish` job
-into an existing CI workflow, or copy the file as-is and adjust the registry
-hostname and image name.
+There are two reusable workflow snippets, depending on whether the
+registry is fronted by TLS:
+
+- `github/workflows/publish-to-tailscale-registry-http.yml` — registry
+  speaks plain HTTP; safe inside the WireGuard tunnel, but the workflow
+  has to relax Docker's TLS check
+- `github/workflows/publish-to-tailscale-registry-https.yml` — registry
+  has a Tailscale-issued Let's Encrypt cert; cleaner workflow, no daemon
+  hacks, but needs `tailscale serve` or a reverse proxy on the host
+
+Drop the `publish` job into an existing CI workflow (or copy the file as-is)
+and adjust the registry hostname and image name. The doc explains the
+tradeoff and how to provision the cert if you go HTTPS.
 
 ## Using the Dependabot template
 
