@@ -1,4 +1,12 @@
-# Publish container image to a private registry over Tailscale.
+# Publish container image to a private registry over Tailscale (HTTP variant).
+#
+# Use this when the registry on your tailnet only speaks plain HTTP. Safe
+# inside the WireGuard tunnel — see docs/publish-to-tailscale-registry.md
+# for the threat model.
+#
+# If the registry has a Tailscale-issued cert (e.g. via `tailscale serve`
+# or a reverse proxy), prefer publish-to-tailscale-registry-https.yml: the
+# workflow is shorter, no Docker daemon hacks needed.
 #
 # Drop the `publish` job below into your existing CI workflow, or copy this
 # whole file to .github/workflows/publish.yml.
