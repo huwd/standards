@@ -64,8 +64,18 @@ jobs:
           username: ${{ secrets.REGISTRY_USERNAME }}
           password: ${{ secrets.REGISTRY_PASSWORD }}
 
+      # Tag with CalVer (YYYY.MM.DD-<sha7>) derived from the commit timestamp so
+      # the tag is stable if the job is re-run on a later date.
+      - name: Generate CalVer tag
+        id: calver
+        run: |
+          commit_date="$(TZ=UTC git show -s --format=%cd --date=format-local:%Y.%m.%d "$GITHUB_SHA")"
+          echo "tag=${commit_date}-$(echo "$GITHUB_SHA" | cut -c1-7)" >> "$GITHUB_OUTPUT"
+
       - uses: docker/build-push-action@bcafcacb16a39f128d818304e6c9c0c18556b85f # v7.1.0
         with:
           context: .
           push: true
-          tags: nas.your-tailnet.ts.net/your-image-name:latest
+          tags: |
+            nas.your-tailnet.ts.net/your-image-name:latest
+            nas.your-tailnet.ts.net/your-image-name:${{ steps.calver.outputs.tag }}
