@@ -156,6 +156,135 @@ a 90-day cert that silently expires will turn the workflow red overnight.
 Option A is the right default unless you have a reason to want a separate
 proxy in front of the registry.
 
+## Versioning — CalVer tags
+
+Both workflow templates push two tags on every build:
+
+- `latest` — always points to the most recent build; used by running containers
+- `YYYY.MM.DD-<sha7>` — e.g. `2026.04.26-a1b2c3d`; immutable, for auditability
+
+The date is taken from the **commit timestamp** (not the run date) so the tag is
+stable if the job is re-run days later:
+
+```bash
+commit_date="$(TZ=UTC git show -s --format=%cd --date=format-local:%Y.%m.%d "$GITHUB_SHA")"
+echo "tag=${commit_date}-$(echo "$GITHUB_SHA" | cut -c1-7)" >> "$GITHUB_OUTPUT"
+```
+
+CalVer suits this pattern well. Images are built on every merge to `main`, not
+on every feature completion — there is no semantic version to increment. The
+date tells you roughly when it was built; the SHA tells you exactly what's in
+it.
+
+## Auto-redeploy with Portainer
+
+If your containers are managed by a Portainer instance on the same tailnet, you
+can trigger a pull-and-redeploy immediately after the push, giving you a full
+CI → image → running container loop in a single workflow run.
+
+### The 127.0.0.1:5000 pull trick
+
+**Do not** use the public Cloudflare-fronted hostname for automated pulls.
+Cloudflare's bot fight mode (and Access policies) block Docker daemon `pull`
+requests, returning HTML instead of a registry manifest. The Docker daemon
+reports this as:
+
+```
+error unmarshalling content: invalid character '<' looking for beginning of value
+```
+
+Instead, pull via `127.0.0.1:5000`. The registry container publishes port 5000
+on all interfaces of the host, and `127.0.0.0/8` is already in the Docker
+daemon's default `insecure-registries` CIDR — no `daemon.json` change or Docker
+restart is needed. This works even though CI pushed using the Tailscale hostname;
+it is the same registry backend.
+
+Do **not** use `pullImage: true` in the Portainer stack update when Cloudflare
+fronts your registry. Portainer passes that flag to `docker compose pull`, which
+hits the Cloudflare-gated public URL and fails. Split it into two steps instead:
+
+1. Explicit pull via Portainer's Docker API with credentials in `X-Registry-Auth`
+2. Stack update with `pullImage: false` — image already on the host
+
+### Required secrets
+
+Add `PORTAINER_ACCESS_KEY` to the repo's Actions secrets alongside the existing
+four. Generate a Portainer long-lived API key in **Account settings → Access
+tokens**.
+
+### Redeploy step
+
+Add this after the `docker/build-push-action` step:
+
+```yaml
+- name: Redeploy on Portainer
+  env:
+    PORTAINER_ACCESS_KEY: ${{ secrets.PORTAINER_ACCESS_KEY }}
+    REGISTRY_USERNAME: ${{ secrets.REGISTRY_USERNAME }}
+    REGISTRY_PASSWORD: ${{ secrets.REGISTRY_PASSWORD }}
+  run: |
+    python3 << 'PYEOF'
+    import base64, json, urllib.request, os
+
+    PORTAINER = "http://nas:9000"   # Tailscale hostname of the Portainer host
+    STACK_ID = 0                    # replace with your Portainer stack ID
+    ENDPOINT_ID = 1                 # replace with your Portainer endpoint ID
+
+    key = os.environ["PORTAINER_ACCESS_KEY"]
+    headers = {"X-API-Key": key, "Content-Type": "application/json"}
+
+    # Pull via 127.0.0.1:5000 — already in the daemon's insecure CIDR,
+    # bypasses Cloudflare entirely.
+    reg_auth = base64.b64encode(json.dumps({
+        "username": os.environ["REGISTRY_USERNAME"],
+        "password": os.environ["REGISTRY_PASSWORD"],
+        "serveraddress": "127.0.0.1:5000",
+    }).encode()).decode()
+    pull_req = urllib.request.Request(
+        f"{PORTAINER}/api/endpoints/{ENDPOINT_ID}/docker/images/create"
+        "?fromImage=127.0.0.1:5000/your-image-name&tag=latest",
+        data=b"",
+        headers={"X-API-Key": key, "X-Registry-Auth": reg_auth},
+        method="POST",
+    )
+    with urllib.request.urlopen(pull_req, timeout=120) as resp:
+        resp.read()
+    print("Image pulled via 127.0.0.1:5000")
+
+    # Fetch env vars stored in Portainer (source of truth for secrets)
+    req = urllib.request.Request(
+        f"{PORTAINER}/api/stacks/{STACK_ID}",
+        headers={"X-API-Key": key},
+    )
+    with urllib.request.urlopen(req, timeout=30) as resp:
+        stack = json.load(resp)
+
+    with open("docker-compose.yml") as f:
+        compose = f.read()
+
+    # Image is already on the host — no pull needed during stack update
+    payload = {"stackFileContent": compose, "env": stack["Env"], "pullImage": False}
+    req = urllib.request.Request(
+        f"{PORTAINER}/api/stacks/{STACK_ID}?endpointId={ENDPOINT_ID}",
+        data=json.dumps(payload).encode(),
+        headers=headers,
+        method="PUT",
+    )
+    with urllib.request.urlopen(req, timeout=120) as resp:
+        result = json.load(resp)
+        print(f"Redeployed stack (status={result['Status']})")
+    PYEOF
+```
+
+The `docker-compose.yml` read in this step should be the canonical stack
+definition committed to the repo. Portainer's stored env vars (fetched via the
+GET) are passed back in the PUT so they are not lost; secrets live in Portainer,
+not in the workflow.
+
+Use `127.0.0.1:5000/your-image-name:latest` as the image reference in that
+`docker-compose.yml` for the same reason — it's the address the Docker daemon
+on the host can always reach without Cloudflare in the path.
+
 ## Per-repo workflow
 
 Drop the `publish` job from the appropriate workflow file into your existing
