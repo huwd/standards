@@ -122,7 +122,7 @@ Ruleset JSON files live in `standards/github/rulesets/`.
 ## Dependabot PR review
 
 When asked to review a Dependabot pull request, follow the process in
-`standards/docs/review-dependabot-pr.md`.
+`~/.claude/review-dependabot-pr.md`.
 
 ---
 
