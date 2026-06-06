@@ -8,13 +8,14 @@ See `docs/plan.md` for the full plan and current status.
 
 ```
 standards/
-  CLAUDE.md          # global Claude standard — symlink to ~/.claude/CLAUDE.md
+  CLAUDE.md                    # global Claude standard — symlink to ~/.claude/CLAUDE.md
 docs/
-  plan.md            # plan and progress for this repo
+  plan.md                      # plan and progress for this repo
+  review-dependabot-pr.md      # Dependabot PR review skill — symlink to ~/.claude/review-dependabot-pr.md
 github/
-  rulesets/          # importable GitHub ruleset JSON files
-  workflows/         # reusable CI workflow templates
-  dependabot.yml     # dependabot config template
+  rulesets/                    # importable GitHub ruleset JSON files
+  workflows/                   # reusable CI workflow templates
+  dependabot.yml               # dependabot config template
 ```
 
 ## Working in this repo
@@ -27,10 +28,16 @@ This repo is primarily documentation and JSON templates. Changes are usually:
 
 Before adding a standard, verify it against at least one real project. Don't invent conventions here — extract them.
 
-When updating `standards/CLAUDE.md`, also update the symlink target so changes take effect globally:
+Global Claude config files in this repo are made available to all projects via
+symlinks into `~/.claude/`. When adding a new global file, create the symlink
+and commit the command here. Current symlinks:
 
 ```bash
-ln -sf <repo_location>/standards/standards/CLAUDE.md ~/.claude/CLAUDE.md
+# Global Claude standard
+ln -sf ~/Projects/Personal/standards/standards/CLAUDE.md ~/.claude/CLAUDE.md
+
+# Dependabot PR review skill
+ln -sf ~/Projects/Personal/standards/docs/review-dependabot-pr.md ~/.claude/review-dependabot-pr.md
 ```
 
 ## Commit standards
