@@ -42,7 +42,8 @@ Normalize the result to `OWNER/REPO` before calling the API.
 List open Dependabot PRs:
 
 ```bash
-curl -fsS "https://api.github.com/repos/<OWNER>/<REPO>/pulls?state=open&per_page=100" \
+# Paginated: increment page=1,2,... until no results.
+curl -fsS "https://api.github.com/repos/<OWNER>/<REPO>/pulls?state=open&per_page=100&page=1" \
   -H "Accept: application/vnd.github+json" \
   -H "X-GitHub-Api-Version: 2022-11-28" \
 | jq -r ".[] | select(.user.login == \"dependabot[bot]\") | [.number, .title, .html_url, .created_at, .head.ref, .head.sha] | @tsv"
