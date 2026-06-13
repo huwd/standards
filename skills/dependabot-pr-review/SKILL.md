@@ -140,7 +140,7 @@ gh repo view --json nameWithOwner -q .nameWithOwner
 # List open Dependabot PRs
 gh pr list --author "app/dependabot" --state open \
   --json number,title,url,createdAt,headRefName,labels \
-  --limit 50
+  --limit 100
 
 # Fetch PR metadata, checks, and diff
 gh pr view <NUMBER> --repo <OWNER/REPO> --json title,body,url,files,headRefName,createdAt,labels
