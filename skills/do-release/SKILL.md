@@ -144,7 +144,7 @@ git tag -a v<version> -m "Release v<version>"
 git push origin v<version>
 ```
 
-If the workflow expects lightweight tags, use the repo convention instead. After pushing the tag, watch the release workflow until it finishes.
+If the workflow expects lightweight tags, use the repo convention instead. After pushing the tag, watch the release workflow until it finishes. A pushed tag is not enough by itself: if the workflow publishes the package but does not create a GitHub Release, create or update the GitHub Release as a separate post-publish step.
 
 ```bash
 gh run list --workflow release.yml --limit 5
@@ -161,9 +161,13 @@ Only trigger the non-dry-run workflow after user approval.
 
 ## Release Notes
 
-Use the changelog entry as the source of truth for release notes. If the repo uses GitHub Releases, create or update the release after the tag exists and before calling the task complete.
+Use the changelog entry as the source of truth for release notes. For GitHub-hosted repos, ensure there is a GitHub Release object for the tag, even when the package publish was triggered only by pushing a tag. Create or update the release after the tag exists and the publish workflow has succeeded, before calling the task complete.
 
 ```bash
+# Check whether a release already exists
+gh release view v<version>
+
+# Create it if missing
 gh release create v<version> --title "v<version>" --notes-file /tmp/release-notes-v<version>.md
 ```
 
@@ -173,7 +177,7 @@ If the tag already has a release, update it instead of creating a duplicate:
 gh release edit v<version> --title "v<version>" --notes-file /tmp/release-notes-v<version>.md
 ```
 
-Do not invent release notes. If the changelog is incomplete, update the changelog first.
+Do not invent release notes. If the changelog is incomplete, update the changelog first. If `gh release view v<version>` fails after a successful package publish, create the GitHub Release rather than treating the release as complete.
 
 ## Verify Publication
 
@@ -193,12 +197,14 @@ cargo search <crate-name> --limit 5
 python -m pip index versions <package-name>
 ```
 
-Also verify the GitHub tag and release:
+Also verify the GitHub tag and release object:
 
 ```bash
 git ls-remote --tags origin "v<version>"
 gh release view v<version>
 ```
+
+If the tag exists but `gh release view` fails, create the missing GitHub Release from the changelog notes and then verify again.
 
 If publishing is delayed by registry indexing, say that explicitly and show the workflow success URL or run id.
 
@@ -224,4 +230,4 @@ End with:
 - checks run
 - release workflow status
 - package registry verification result
-- GitHub release URL, if created
+- GitHub release URL
