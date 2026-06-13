@@ -14,6 +14,7 @@ docs/
 skills/
   SKILLS.md                    # skill authoring, compatibility, and symlink conventions
   dependabot-pr-review/        # portable Dependabot PR review skill
+  do-release/                  # portable package release workflow skill
 github/
   rulesets/                    # importable GitHub ruleset JSON files
   workflows/                   # reusable CI workflow templates
@@ -46,6 +47,11 @@ ln -sf ~/Projects/Personal/standards/standards/CLAUDE.md ~/.claude/CLAUDE.md
 ln -sfn ~/Projects/Personal/standards/skills/dependabot-pr-review ~/.claude/skills/dependabot-pr-review
 ln -sfn ~/Projects/Personal/standards/skills/dependabot-pr-review ~/.codex/skills/dependabot-pr-review
 ln -sfn ~/Projects/Personal/standards/skills/dependabot-pr-review ~/.agents/skills/dependabot-pr-review
+
+# Release workflow skill
+ln -sfn ~/Projects/Personal/standards/skills/do-release ~/.claude/skills/do-release
+ln -sfn ~/Projects/Personal/standards/skills/do-release ~/.codex/skills/do-release
+ln -sfn ~/Projects/Personal/standards/skills/do-release ~/.agents/skills/do-release
 ```
 
 ## Commit standards
