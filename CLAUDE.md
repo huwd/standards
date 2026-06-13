@@ -11,7 +11,9 @@ standards/
   CLAUDE.md                    # global Claude standard — symlink to ~/.claude/CLAUDE.md
 docs/
   plan.md                      # plan and progress for this repo
-  review-dependabot-pr.md      # Dependabot PR review skill — symlink to ~/.claude/review-dependabot-pr.md
+skills/
+  SKILLS.md                    # skill authoring, compatibility, and symlink conventions
+  dependabot-pr-review/        # portable Dependabot PR review skill
 github/
   rulesets/                    # importable GitHub ruleset JSON files
   workflows/                   # reusable CI workflow templates
@@ -28,6 +30,10 @@ This repo is primarily documentation and JSON templates. Changes are usually:
 
 Before adding a standard, verify it against at least one real project. Don't invent conventions here — extract them.
 
+Cross-harness skills should be authored under `skills/` using the Agent Skills
+directory format, then symlinked into each tool-specific skills directory; see
+`skills/SKILLS.md`.
+
 Global Claude config files in this repo are made available to all projects via
 symlinks into `~/.claude/`. When adding a new global file, create the symlink
 and commit the command here. Current symlinks:
@@ -37,7 +43,9 @@ and commit the command here. Current symlinks:
 ln -sf ~/Projects/Personal/standards/standards/CLAUDE.md ~/.claude/CLAUDE.md
 
 # Dependabot PR review skill
-ln -sf ~/Projects/Personal/standards/docs/review-dependabot-pr.md ~/.claude/review-dependabot-pr.md
+ln -sfn ~/Projects/Personal/standards/skills/dependabot-pr-review ~/.claude/skills/dependabot-pr-review
+ln -sfn ~/Projects/Personal/standards/skills/dependabot-pr-review ~/.codex/skills/dependabot-pr-review
+ln -sfn ~/Projects/Personal/standards/skills/dependabot-pr-review ~/.agents/skills/dependabot-pr-review
 ```
 
 ## Commit standards
