@@ -58,6 +58,14 @@ Valid prefixes match commit types: `feat/` `fix/` `chore/` `ci/` `test/` `docs/`
 
 ---
 
+## Pull requests
+
+- If a PR fully resolves a tracked issue, link it with a closing keyword (`Closes #N`, `Fixes #N`) so merging closes the issue automatically.
+- If a PR is a partial fix, reference the issue without a closing keyword (`Refs #N`, `Part of #N`) — don't let a partial fix silently close unfinished work.
+- If partial-fix PRs against one issue keep happening, that's a sign the issue is too coarse-grained: split it into subtasks/sub-issues up front instead of discovering the split mid-PR.
+
+---
+
 ## Development workflow (TDD)
 
 Follow a strict red-green-refactor cycle. Commit between each step.
