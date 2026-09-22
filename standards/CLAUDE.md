@@ -129,7 +129,7 @@ Ruleset JSON files live in `standards/github/rulesets/`.
 
 ## Dependabot PR review
 
-When asked to review a Dependabot pull request, use the `dependabot-pr-review` skill from `skills/dependabot-pr-review/`.
+When asked to review a Dependabot pull request, use the `dependabot-pr-review` skill from [huwd/skills](https://github.com/huwd/skills).
 
 ---
 
