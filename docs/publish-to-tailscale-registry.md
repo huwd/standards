@@ -234,8 +234,9 @@ Add this after the `docker/build-push-action` step:
     headers = {"X-API-Key": key, "Content-Type": "application/json"}
 
     # Pull via 127.0.0.1:5000 — already in the daemon's insecure CIDR,
-    # bypasses Cloudflare entirely.
-    reg_auth = base64.b64encode(json.dumps({
+    # bypasses Cloudflare entirely. X-Registry-Auth is base64url, not plain
+    # base64 (see Gotchas).
+    reg_auth = base64.urlsafe_b64encode(json.dumps({
         "username": os.environ["REGISTRY_USERNAME"],
         "password": os.environ["REGISTRY_PASSWORD"],
         "serveraddress": "127.0.0.1:5000",
@@ -371,6 +372,17 @@ If you go with Option B (manual `tailscale cert` + reverse proxy), the
 renewal cron is what keeps the workflow working. Set it up the same day you
 issue the cert, not "later". `tailscale serve` (Option A) handles renewal
 for you and is the recommended default for this reason.
+
+### `X-Registry-Auth` is base64url, not base64
+
+Applies to the Portainer redeploy step. Docker decodes the `X-Registry-Auth`
+header with Go's `base64.URLEncoding`
+([moby's `DecodeAuthConfig`](https://github.com/moby/moby/blob/v28.5.1/api/types/registry/authconfig.go#L44-L68)),
+so encode it with Python's `base64.urlsafe_b64encode`. Plain `b64encode`
+works only until the encoded credentials happen to contain `+` or `/`.
+That depends on the username and password: `abc?` as a password is
+enough. The daemon then can't decode the header, and the authenticated
+pull fails.
 
 ### Eventual consistency on tailnet enrolment
 
